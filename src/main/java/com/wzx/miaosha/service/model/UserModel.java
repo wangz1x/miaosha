@@ -1,5 +1,9 @@
 package com.wzx.miaosha.service.model;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+
 /**
  * 领域模型主要用于开发人员进行业务处理
  * @author wangzx
@@ -8,20 +12,30 @@ package com.wzx.miaosha.service.model;
  */
 public class UserModel {
 
+
     private Integer id;
 
+    @NotNull(message = "用户名不能为空")
     private String name;
 
+    @NotNull(message = "性别不能为空")
     private Byte gender;
 
+    /**
+     * 18+
+     */
+    @NotNull(message = "用户名不能为空")
+    @Max(120)
+    @Min(18)
     private Integer age;
 
+    @NotNull(message = "手机号不能为空")
     private String telphone;
 
     private String registerMode;
-
     private String thirdPartyId;
 
+    @NotNull(message = "密码不能为空")
     private String encryptPassword;
 
     public Integer getId() {

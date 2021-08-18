@@ -16,6 +16,7 @@ import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -41,11 +42,16 @@ public class UserController {
 
 
     @PostMapping("/login")
-    public CommonResponseType<String> login(@RequestParam(value = "telphone") String telphone,
+    public CommonResponseType<UserModel> login(@RequestParam(value = "telphone") String telphone,
                                             @RequestParam(value = "password") String password) throws BusinessException {
+        // 验证
+        if (StringUtils.isEmpty(telphone) || StringUtils.isEmpty(password)) {
+            throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR, "手机号或密码为空");
+        }
+        UserModel userModel = userService.validateLogin(telphone, getMD5(password));
 
-
-        return CommonResponseType.createSuccess(null);
+        request.getSession().setAttribute("LOGIN_USER", userModel);
+        return CommonResponseType.createSuccess(userModel);
     }
 
     @PostMapping("/register")
@@ -53,8 +59,8 @@ public class UserController {
                                                @RequestParam(value = "otpCode") String otpCode,
                                                @RequestParam(value = "name") String name,
                                                @RequestParam(value = "password") String password,
-                                               @RequestParam(value = "age") int age,
-                                               @RequestParam(value = "gender") byte gender) throws BusinessException {
+                                               @RequestParam(value = "age") Integer age,
+                                               @RequestParam(value = "gender") Integer gender) throws BusinessException {
         // 验证手机号和optcode是否符合
         String attribute = (String) request.getSession().getAttribute(telphone);
         boolean equals = StringUtils.equals(attribute, otpCode);
@@ -65,7 +71,7 @@ public class UserController {
         UserModel userModel = new UserModel();
         userModel.setName(name);
         userModel.setAge(age);
-        userModel.setGender(gender);
+        userModel.setGender(new Byte(String.valueOf(gender)));
         userModel.setEncryptPassword(getMD5(password));
         userModel.setTelphone(telphone);
         logger.info("register userModel: {}", userModel);
@@ -86,7 +92,8 @@ public class UserController {
      * opt: one-time password
      */
     @PostMapping("/getotp")
-    public CommonResponseType<Object> produceOpt(@RequestParam(value = "telphone") String telphone) {
+    public CommonResponseType<Object> produceOpt(@RequestParam(value = "telphone") String telphone,
+                                                 HttpSession httpSession) {
         Random random = new Random(System.currentTimeMillis());
         int opt = random.nextInt(99999) + 10000;
         String optStr = String.valueOf(opt);
@@ -106,7 +113,6 @@ public class UserController {
         BeanUtils.copyProperties(userModel, userVO);
         return userVO;
     }
-
 
     /**
      * MD5 加密密码

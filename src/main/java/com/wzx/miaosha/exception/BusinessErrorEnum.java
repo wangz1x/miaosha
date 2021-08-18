@@ -13,7 +13,11 @@ public enum BusinessErrorEnum implements CommonError{
 
     USER_NOT_EXIST(20001, "用户不存在"),
 
-    REPEATED_USER(20002, "手机号已注册")
+    REPEATED_USER(20002, "手机号已注册"),
+
+    NOT_MATCH_ERROR(20003, "手机号或密码错误"),
+
+    USER_NOT_LOGIN(20004, "用户未登录"),
 
     ;
 

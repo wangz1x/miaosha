@@ -1,7 +1,5 @@
 package com.wzx.miaosha.service.impl;
 
-import com.wzx.miaosha.constant.Constant;
-import com.wzx.miaosha.constant.GeneralEnum;
 import com.wzx.miaosha.dao.UserDOMapper;
 import com.wzx.miaosha.dao.UserPasswordDOMapper;
 import com.wzx.miaosha.dataobject.UserDO;
@@ -10,13 +8,14 @@ import com.wzx.miaosha.exception.BusinessErrorEnum;
 import com.wzx.miaosha.exception.BusinessException;
 import com.wzx.miaosha.service.UserService;
 import com.wzx.miaosha.service.model.UserModel;
+import com.wzx.miaosha.validator.ValidatorImpl;
+import com.wzx.miaosha.validator.ValidatorResult;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.DigestUtils;
 
 /**
  * @author wangzx
@@ -31,6 +30,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     UserPasswordDOMapper userPasswordDOMapper;
+
+    @Autowired
+    ValidatorImpl validator;
 
     @Override
     public UserModel queryUserById(Integer id) {
@@ -51,15 +53,16 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     @Transactional(rollbackFor = RuntimeException.class)
-    public void register(UserModel userModel) throws BusinessException {
+    public void register(UserModel userModel) {
         if (userModel == null) {
             throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR, "注册信息为空");
         }
-        if (userModel.getAge() == null || userModel.getGender() == null
-                || StringUtils.isEmpty(userModel.getName()) || StringUtils.isEmpty(userModel.getTelphone())
-                || StringUtils.isEmpty(userModel.getEncryptPassword())) {
-            throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR, "注册信息不完整");
+
+        ValidatorResult validate = validator.validate(userModel);
+        if (validate.isHasErrors()) {
+            throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR, validate.getErrMsg());
         }
+
         UserDO userDO = convertFromUserModelToUserDO(userModel);
         try {
             userDOMapper.insertSelective(userDO);
@@ -70,6 +73,24 @@ public class UserServiceImpl implements UserService {
         userModel.setId(userDO.getId());
         UserPasswordDO userPasswordDO = convertFromUserModelToPasswordDO(userModel);
         userPasswordDOMapper.insertSelective(userPasswordDO);
+    }
+
+    @Override
+    public UserModel validateLogin(String telphone, String password) {
+
+        // 获取用户信息
+        UserDO userDO = userDOMapper.selectByTelphone(telphone);
+        if (userDO == null) {
+            throw new BusinessException(BusinessErrorEnum.USER_NOT_EXIST);
+        }
+
+        // 再获取用户密码
+        UserPasswordDO userPasswordDO = userPasswordDOMapper.selectByUserId(userDO.getId());
+
+        if (!StringUtils.equals(password, userPasswordDO.getEncryptPassword())) {
+            throw new BusinessException(BusinessErrorEnum.NOT_MATCH_ERROR);
+        }
+        return convertFromUserAndPasswordDO(userDO, userPasswordDO);
     }
 
     /**
