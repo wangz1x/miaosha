@@ -51,6 +51,7 @@ public class UserController {
         UserModel userModel = userService.validateLogin(telphone, getMD5(password));
 
         request.getSession().setAttribute("LOGIN_USER", userModel);
+        request.getSession().setAttribute("IS_LOGIN", Boolean.TRUE);
         return CommonResponseType.createSuccess(userModel);
     }
 

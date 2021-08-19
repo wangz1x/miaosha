@@ -2,6 +2,7 @@ package com.wzx.miaosha.dao;
 
 import com.wzx.miaosha.dataobject.ItemDO;
 import com.wzx.miaosha.service.model.ItemModel;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -55,4 +56,6 @@ public interface ItemDOMapper {
     int updateByPrimaryKey(ItemDO record);
 
     List<ItemDO> listItem();
+
+    int increaseSales(@Param("itemId") Integer itemId, @Param("amount") Integer amount);
 }

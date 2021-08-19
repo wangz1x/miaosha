@@ -37,6 +37,7 @@ public class ItemServiceImpl implements ItemService {
     @Autowired
     ItemStockDOMapper itemStockDOMapper;
 
+
     /**
      * 一般写入的时候需要保证原子性?
      * @param itemModel
@@ -114,6 +115,20 @@ public class ItemServiceImpl implements ItemService {
         ItemStockDO itemStockDO = itemStockDOMapper.selectByItemId(itemDO.getId());
         ItemModel itemModel = combineFromItemDOAndItemStockDO(itemDO, itemStockDO);
         return itemModel;
+    }
+
+    @Override
+    public boolean decreaseStock(Integer itemId, Integer amount) {
+        int row = itemStockDOMapper.decreaseStock(itemId, amount);
+        if (row > 0) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void increaseSales(Integer itemId, Integer amount) {
+        itemDOMapper.increaseSales(itemId, amount);
     }
 
     private ItemModel combineFromItemDOAndItemStockDO(ItemDO itemDO, ItemStockDO itemStockDO) {

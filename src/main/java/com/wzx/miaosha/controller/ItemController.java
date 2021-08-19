@@ -1,6 +1,5 @@
 package com.wzx.miaosha.controller;
 
-import com.alibaba.druid.sql.ast.expr.SQLCaseExpr;
 import com.wzx.miaosha.controller.vo.ItemVO;
 import com.wzx.miaosha.response.CommonResponseType;
 import com.wzx.miaosha.service.ItemService;

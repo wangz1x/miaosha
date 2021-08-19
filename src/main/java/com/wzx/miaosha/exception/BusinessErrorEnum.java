@@ -7,9 +7,13 @@ package com.wzx.miaosha.exception;
  */
 public enum BusinessErrorEnum implements CommonError{
 
+    // 通用错误
+
     PARAMETER_VALIDATION_ERROR(10001, "参数不合法"),
 
     UNKNOWN_ERROR(10002, "未知错误"),
+
+    // 用户信息错误
 
     USER_NOT_EXIST(20001, "用户不存在"),
 
@@ -19,6 +23,8 @@ public enum BusinessErrorEnum implements CommonError{
 
     USER_NOT_LOGIN(20004, "用户未登录"),
 
+    // 交易信息错误
+    STOCK_NOT_ENOUGH(30001, "商品库存不足"),
     ;
 
     public void test() {

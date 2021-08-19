@@ -11,4 +11,7 @@ public class Constant {
      * MD5 加盐
      */
     public static final String SALT = "WANGZX";
+
+    public static final String CONTENT_TYPE_FORMED="application/x-www-form-urlencoded";
+
 }
