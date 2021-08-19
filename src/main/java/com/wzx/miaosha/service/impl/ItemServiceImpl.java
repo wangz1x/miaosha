@@ -7,7 +7,9 @@ import com.wzx.miaosha.dataobject.ItemStockDO;
 import com.wzx.miaosha.exception.BusinessErrorEnum;
 import com.wzx.miaosha.exception.BusinessException;
 import com.wzx.miaosha.service.ItemService;
+import com.wzx.miaosha.service.PromoService;
 import com.wzx.miaosha.service.model.ItemModel;
+import com.wzx.miaosha.service.model.PromoModel;
 import com.wzx.miaosha.validator.ValidatorImpl;
 import com.wzx.miaosha.validator.ValidatorResult;
 import org.springframework.beans.BeanUtils;
@@ -27,7 +29,6 @@ import java.util.stream.Collectors;
 @Service
 public class ItemServiceImpl implements ItemService {
 
-
     @Autowired
     ValidatorImpl validator;
 
@@ -37,6 +38,8 @@ public class ItemServiceImpl implements ItemService {
     @Autowired
     ItemStockDOMapper itemStockDOMapper;
 
+    @Autowired
+    PromoService promoService;
 
     /**
      * 一般写入的时候需要保证原子性?
@@ -112,12 +115,20 @@ public class ItemServiceImpl implements ItemService {
         if (itemDO == null) {
             return null;
         }
+        // 获取库存
         ItemStockDO itemStockDO = itemStockDOMapper.selectByItemId(itemDO.getId());
         ItemModel itemModel = combineFromItemDOAndItemStockDO(itemDO, itemStockDO);
+
+        // 获取营销活动
+        PromoModel promoModel = promoService.queryPromoByItemId(itemModel.getId());
+        if (promoModel != null && promoModel.getStatus() != 3) {
+            itemModel.setPromoModel(promoModel);
+        }
         return itemModel;
     }
 
     @Override
+    @Transactional
     public boolean decreaseStock(Integer itemId, Integer amount) {
         int row = itemStockDOMapper.decreaseStock(itemId, amount);
         if (row > 0) {
@@ -127,6 +138,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional
     public void increaseSales(Integer itemId, Integer amount) {
         itemDOMapper.increaseSales(itemId, amount);
     }

@@ -16,5 +16,5 @@ public interface OrderService {
      * @param amount 购买数量
      * @return
      */
-    OrderModel createOrder(Integer userId, Integer itemId, Integer amount);
+    OrderModel createOrder(Integer userId, Integer itemId, Integer promoId, Integer amount);
 }

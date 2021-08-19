@@ -80,3 +80,18 @@ create table sequence_info
 
 insert into sequence_info
 values ('order_info', 0, 1);
+
+create table promo
+(
+    id          int          not null auto_increment comment '自增主键',
+    promo_name  varchar(120) not null default '' comment '营销名称',
+    start_time  datetime     not null comment '活动起始时间',
+    end_time    datetime     not null comment '活动结束时间',
+    item_id     int          not null default 0 comment '活动适用产品id',
+    promo_price double       not null default 0.0 comment '活动售价',
+    primary key (id),
+    index item_id_idx (item_id)
+) auto_increment = 1000;
+
+insert into promo (promo_name, start_time, end_time, item_id, promo_price)
+values ('999.99秒杀iphone11', '2021-08-19 00:00:00', '2021-08-20 00:00:00', 1, 999.99);

@@ -25,6 +25,11 @@ public enum BusinessErrorEnum implements CommonError{
 
     // 交易信息错误
     STOCK_NOT_ENOUGH(30001, "商品库存不足"),
+
+    // 活动信息错误
+    PROMO_NOT_MATCH(40001, "活动信息不匹配"),
+
+    PROMO_NOT_START(40002, "活动未开始"),
     ;
 
     public void test() {

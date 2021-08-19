@@ -31,6 +31,9 @@ public class ItemModel {
     @NotNull(message = "商品图片不能为空")
     private String imageUrl;
 
+    // 聚合模型, 如果promoModel不为空, 则说明该商品存在未结束的活动
+    private PromoModel promoModel;
+
     public String getImageUrl() {
         return imageUrl;
     }
@@ -97,5 +100,13 @@ public class ItemModel {
 
     public void setPrice(BigDecimal price) {
         this.price = price;
+    }
+
+    public PromoModel getPromoModel() {
+        return promoModel;
+    }
+
+    public void setPromoModel(PromoModel promoModel) {
+        this.promoModel = promoModel;
     }
 }

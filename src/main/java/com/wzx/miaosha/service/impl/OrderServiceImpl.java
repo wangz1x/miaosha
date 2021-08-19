@@ -9,9 +9,11 @@ import com.wzx.miaosha.exception.BusinessErrorEnum;
 import com.wzx.miaosha.exception.BusinessException;
 import com.wzx.miaosha.service.ItemService;
 import com.wzx.miaosha.service.OrderService;
+import com.wzx.miaosha.service.PromoService;
 import com.wzx.miaosha.service.UserService;
 import com.wzx.miaosha.service.model.ItemModel;
 import com.wzx.miaosha.service.model.OrderModel;
+import com.wzx.miaosha.service.model.PromoModel;
 import com.wzx.miaosha.service.model.UserModel;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,9 +52,12 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     SequenceDOMapper sequenceDOMapper;
 
+    @Autowired
+    PromoService promoService;
+
     @Override
     @Transactional
-    public OrderModel createOrder(Integer userId, Integer itemId, Integer amount) {
+    public OrderModel createOrder(Integer userId, Integer itemId, Integer promoId, Integer amount) {
 
         // 1. 校验
         ItemModel itemModel = itemService.getItemById(itemId);
@@ -69,6 +74,20 @@ public class OrderServiceImpl implements OrderService {
             throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR, "购买数量出错了");
         }
 
+        PromoModel promoModel = itemModel.getPromoModel();
+        BigDecimal itemPrice;
+        if (promoId != null && promoModel != null) {
+            if (promoId.intValue() != promoModel.getId()) {
+                throw new BusinessException(BusinessErrorEnum.PROMO_NOT_MATCH);
+            }
+            if (promoModel.getStatus() != 2) {
+                throw new BusinessException(BusinessErrorEnum.PROMO_NOT_START);
+            }
+            itemPrice = promoModel.getPromoPrice();
+        } else {
+            itemPrice = itemModel.getPrice();
+        }
+
         // 2. 落单减库存
         boolean result = itemService.decreaseStock(itemId, amount);
         if (!result) {
@@ -80,8 +99,8 @@ public class OrderServiceImpl implements OrderService {
         orderModel.setUserId(userId);
         orderModel.setItemId(itemId);
         orderModel.setAmount(amount);
-        orderModel.setItemPrice(itemModel.getPrice());
-        orderModel.setOrderPrice(itemModel.getPrice().multiply(BigDecimal.valueOf(amount)));
+        orderModel.setItemPrice(itemPrice);
+        orderModel.setOrderPrice(itemPrice.multiply(BigDecimal.valueOf(amount)));
         orderModel.setId(generateOrderNumber());
         OrderDO orderDO = convertFromOrderModel(orderModel);
         orderDOMapper.insertSelective(orderDO);
@@ -94,6 +113,7 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * 私有方法会失效
+     *
      * @return
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)

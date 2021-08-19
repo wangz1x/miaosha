@@ -7,10 +7,7 @@ import com.wzx.miaosha.service.OrderService;
 import com.wzx.miaosha.service.model.OrderModel;
 import com.wzx.miaosha.service.model.UserModel;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -23,6 +20,7 @@ import static com.wzx.miaosha.constant.Constant.CONTENT_TYPE_FORMED;
  */
 @RestController
 @RequestMapping("/order")
+@CrossOrigin(originPatterns = "*", allowCredentials = "true")
 public class OrderController {
 
 
@@ -36,15 +34,16 @@ public class OrderController {
 
     @PostMapping(value = "/createorder", consumes = {CONTENT_TYPE_FORMED})
     public CommonResponseType<OrderModel> createOrder(@RequestParam("itemId") Integer itemId,
-                                                  @RequestParam("amount") Integer amount
-                                                  ) {
+                                                      @RequestParam("amount") Integer amount,
+                                                      @RequestParam("promoId") Integer promoId
+    ) {
         Boolean is_login = (Boolean) httpServletRequest.getSession().getAttribute("IS_LOGIN");
-        if (!is_login) {
+        if (is_login == null || !is_login) {
             throw new BusinessException(BusinessErrorEnum.USER_NOT_LOGIN);
         }
         UserModel userModel = (UserModel) httpServletRequest.getSession().getAttribute("LOGIN_USER");
 
-        OrderModel order = orderService.createOrder(userModel.getId(), itemId, amount);
+        OrderModel order = orderService.createOrder(userModel.getId(), itemId, promoId, amount);
 
         return CommonResponseType.createSuccess(order);
     }

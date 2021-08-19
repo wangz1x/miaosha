@@ -21,7 +21,6 @@ import javax.servlet.http.HttpServletRequest;
 public class ExceptionController {
 
     @ExceptionHandler(Exception.class)
-    @ResponseStatus(HttpStatus.OK)
     public Object exceptionHandler(Exception ex) {
         CommonResponseType<Object> commonResponseType = new CommonResponseType<>();
         if (ex instanceof BusinessException) {
