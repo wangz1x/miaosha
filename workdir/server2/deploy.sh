@@ -1,0 +1,1 @@
+nohup java -Xms512m -Xmx512m -XX:NewSize=256m -XX:MaxNewSize=256m -jar miaosha-8099.jar --spring.config.addition=location=/home/wangzx/IdeaProjects/miaosha/workdir/server2/application.yaml > log 2>&1 &

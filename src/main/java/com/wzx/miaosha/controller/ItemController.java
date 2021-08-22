@@ -5,10 +5,13 @@ import com.wzx.miaosha.response.CommonResponseType;
 import com.wzx.miaosha.service.ItemService;
 import com.wzx.miaosha.service.model.ItemModel;
 import com.wzx.miaosha.service.model.PromoModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,6 +28,11 @@ public class ItemController {
 
     @Autowired
     ItemService itemService;
+
+    @Autowired
+    HttpServletRequest request;
+
+    private static final Logger logger = LoggerFactory.getLogger(ItemController.class);
 
     @PostMapping("/create")
     public CommonResponseType<ItemVO> createItem(@RequestParam(value = "title") String title,

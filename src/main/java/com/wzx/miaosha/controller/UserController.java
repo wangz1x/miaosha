@@ -12,14 +12,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
 
 /**
  * @author wangzx
@@ -29,7 +32,7 @@ import java.util.Random;
 
 @RestController
 @RequestMapping("/user")
-@CrossOrigin(allowCredentials = "true", originPatterns="*")
+@CrossOrigin(allowCredentials = "true", originPatterns = "*")
 public class UserController {
 
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
@@ -40,9 +43,11 @@ public class UserController {
     @Autowired
     HttpServletRequest request;
 
+    @Autowired
+    RedisTemplate redisTemplate;
 
     @PostMapping("/login")
-    public CommonResponseType<UserModel> login(@RequestParam(value = "telphone") String telphone,
+    public CommonResponseType<String> login(@RequestParam(value = "telphone") String telphone,
                                             @RequestParam(value = "password") String password) throws BusinessException {
         // 验证
         if (StringUtils.isEmpty(telphone) || StringUtils.isEmpty(password)) {
@@ -50,9 +55,16 @@ public class UserController {
         }
         UserModel userModel = userService.validateLogin(telphone, getMD5(password));
 
-        request.getSession().setAttribute("LOGIN_USER", userModel);
-        request.getSession().setAttribute("IS_LOGIN", Boolean.TRUE);
-        return CommonResponseType.createSuccess(userModel);
+//        request.getSession().setAttribute("LOGIN_USER", userModel);
+//        request.getSession().setAttribute("IS_LOGIN", true);
+//        logger.info("LOGIN_USER: {}", request.getSession().getAttribute("LOGIN_USER"));
+//        logger.info("IS_LOGIN: {}", request.getSession().getAttribute("IS_LOGIN"));
+
+        // 把生成的token放到redis中, 受不了这个气
+        String token = UUID.randomUUID().toString().replace("-", "");
+        redisTemplate.opsForValue().set(token, userModel, Duration.ofHours(1));
+
+        return CommonResponseType.createSuccess(token);
     }
 
     @PostMapping("/register")
@@ -83,7 +95,7 @@ public class UserController {
 
     @GetMapping("/{id}")
     public CommonResponseType<UserVO> queryUserById(@PathVariable("id") Integer id
-                                                    ) throws BusinessException {
+    ) throws BusinessException {
         UserModel userModel = userService.queryUserById(id);
         UserVO userVO = convertFromModel(userModel);
         return CommonResponseType.createSuccess(userVO);

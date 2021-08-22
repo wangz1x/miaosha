@@ -3,6 +3,7 @@ package com.wzx.miaosha.service.model;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 
 /**
  * 领域模型主要用于开发人员进行业务处理
@@ -10,7 +11,7 @@ import javax.validation.constraints.NotNull;
  * email wangzx22@163.com
  * date 2021/8/13 下午12:45
  */
-public class UserModel {
+public class UserModel implements Serializable {
 
 
     private Integer id;

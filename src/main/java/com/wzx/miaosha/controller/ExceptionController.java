@@ -30,7 +30,6 @@ public class ExceptionController {
             commonResponseType.setStatus(BusinessErrorEnum.UNKNOWN_ERROR.getErrorCode());
             commonResponseType.setMsg(BusinessErrorEnum.UNKNOWN_ERROR.getErrorMsg());
         }
-        ex.printStackTrace();
         return commonResponseType;
     }
 }

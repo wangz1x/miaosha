@@ -1,5 +1,16 @@
 server:
   port: 8090
+  tomcat:
+    accept-count: 100
+    threads:
+      max: 200 # 4核8g经验800
+      min-spare: 10
+    max-keep-alive-requests: 1000
+    keep-alive-timeout: 30000
+#    accesslog:
+#      enabled: true
+#      directory: /home/wangzx/IdeaProjects/miaosha/workdir/server1
+
 mybatis:
   mapper-locations: classpath:mapping/*.xml
 
@@ -11,4 +22,7 @@ spring:
     password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
-
+  redis:
+    host: 172.18.0.2
+    port: 6379
+    database: 10
